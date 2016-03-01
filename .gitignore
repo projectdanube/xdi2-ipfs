@@ -1,4 +1,8 @@
-/target
-/.settings
-.project
+log4j.log
+.externalToolBuilders
+.DS_Store
 .classpath
+.project
+/.settings/
+/bin/
+/target/
