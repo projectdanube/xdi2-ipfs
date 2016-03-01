@@ -1,7 +1,8 @@
 <a href="http://projectdanube.org/" target="_blank"><img src="http://projectdanube.github.com/xdi2/images/projectdanube_logo.png" align="right"></a>
 <img src="http://projectdanube.github.com/xdi2/images/logo64.png"><br>
 
-This is a project to connect [XDI2](http://github.com/projectdanube/xdi2) components to the [IPFS](http://ipfs.io/) distributed object store.
+This is an XDI2 plugin to integrate [XDI2](http://github.com/projectdanube/xdi2) components with the
+[IPFS](http://ipfs.io/) distributed object store.
 
 ### Information
 
