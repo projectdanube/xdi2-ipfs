@@ -8,25 +8,28 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.ipfs.api.MerkleNode;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import xdi2.core.ContextNode;
 import xdi2.core.LiteralNode;
 import xdi2.core.Node;
 import xdi2.core.Relation;
 import xdi2.core.impl.AbstractContextNode;
+import xdi2.core.impl.AbstractLiteralNode;
+import xdi2.core.impl.memory.MemoryGraphFactory;
 import xdi2.core.syntax.XDIAddress;
 import xdi2.core.syntax.XDIArc;
-import xdi2.core.util.iterators.EmptyIterator;
 import xdi2.core.util.iterators.ReadOnlyIterator;
 
 public class IPFSContextNode extends AbstractContextNode implements ContextNode {
 
 	private static final long serialVersionUID = 4930852359817860369L;
 
-	private XDIArc XDIarc;
-
-	private Map<XDIArc, IPFSContextNode> contextNodes;
-	private Map<XDIAddress, Map<XDIAddress, IPFSRelation>> relations;
-	private IPFSLiteralNode literalNode;
+	private MerkleNode merkleNode;
+	private JsonObject jsonObject;
 
 	IPFSContextNode(IPFSGraph graph, IPFSContextNode contextNode, XDIArc XDIarc) {
 
@@ -216,12 +219,15 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 	@Override
 	public LiteralNode getLiteralNode() {
 
-		return this.literalNode;
+		JsonElement jsonElement = this.jsonObject.get("&");
+		if (jsonElement == null) return null;
+
+		return new IPFSLiteralNode(this, AbstractLiteralNode.jsonElementToLiteralData(jsonElement));
 	}
 
 	@Override
 	public synchronized void delLiteralNode() {
 
-		this.literalNode = null;
+		this.jsonObject.remove("&");
 	}
 }
