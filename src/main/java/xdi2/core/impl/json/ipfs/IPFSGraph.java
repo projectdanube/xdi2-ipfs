@@ -44,49 +44,6 @@ public class IPFSGraph extends AbstractGraph implements Graph {
 	}
 
 	/*
-	 * Retrieve/store methods
-	 */
-	
-	void store(IPFSContextNode contextNode) {
-
-		JsonArray ipfsLinks = new JsonArray();
-		JsonObject ipfsObjects = new JsonObject();
-
-		for (ContextNode contextNode : parentContextNode.getContextNodes()) {
-
-			MerkleNode merkleNode = contextNodeToIPFS(ipfs, contextNode);
-
-			JsonObject ipfsLink = new JsonObject();
-			ipfsLink.addProperty("Name", contextNode.getXDIArc().toString());
-			ipfsLink.addProperty("Hash", merkleNode.hash.toBase58());
-			ipfsLink.addProperty("Size", merkleNode.size.isPresent() ? merkleNode.size.get() : Integer.valueOf(0));
-
-			ipfsLinks.add(ipfsLink);
-		}
-
-		JsonObject ipfsData = new JsonObject();
-
-		for (Relation relation : parentContextNode.getRelations()) {
-
-			ipfsData.addProperty("/" + relation.getXDIAddress().toString(), relation.getTargetXDIAddress().toString());
-		}
-
-		if (parentContextNode.containsLiteralNode()) { 
-
-			ipfsData.add("&", AbstractLiteralNode.literalDataToJsonElement(parentContextNode.getLiteralData()));
-		}
-
-		ipfsObjects.addProperty("Data", gson.toJson(ipfsData));
-		ipfsObjects.add("Links", ipfsLinks);
-
-		System.out.println(gson.toJson(ipfsObjects));
-
-		MerkleNode parentMerkleNode = ipfs.object.put(Collections.singletonList(gson.toJson(ipfsObjects).getBytes("UTF-8"))).get(0);
-		System.out.println(parentContextNode.getXDIAddress() + " --> " + parentMerkleNode.hash.toBase58());
-		return parentMerkleNode;
-	}
-	
-	/*
 	 * Misc methods
 	 */
 
