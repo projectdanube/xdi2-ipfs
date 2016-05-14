@@ -7,7 +7,6 @@ import org.ipfs.api.MultiAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import xdi2.core.Graph;
 import xdi2.core.GraphFactory;
 import xdi2.core.impl.AbstractGraphFactory;
 
@@ -32,7 +31,7 @@ public class IPFSGraphFactory extends AbstractGraphFactory implements GraphFacto
 	}
 
 	@Override
-	public Graph openGraph(String identifier) throws IOException {
+	public IPFSGraph openGraph(String identifier) throws IOException {
 
 		IPFS ipfs = new IPFS(new MultiAddress(this.getIpfsMultiaddress()));
 

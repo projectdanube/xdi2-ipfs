@@ -1,18 +1,11 @@
 package xdi2.core.impl.json.ipfs;
 
-import java.util.Collections;
-
 import org.ipfs.api.IPFS;
-import org.ipfs.api.MerkleNode;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import org.ipfs.api.Multihash;
 
 import xdi2.core.ContextNode;
 import xdi2.core.Graph;
-import xdi2.core.Relation;
 import xdi2.core.impl.AbstractGraph;
-import xdi2.core.impl.AbstractLiteralNode;
 
 public class IPFSGraph extends AbstractGraph implements Graph {
 
@@ -28,7 +21,7 @@ public class IPFSGraph extends AbstractGraph implements Graph {
 
 		this.ipfs = ipfs;
 
-		this.rootContextNode = new IPFSContextNode(this, null, null);
+		this.rootContextNode = IPFSContextNode.load(this, null, null, Multihash.fromBase58(identifier));
 	}
 
 	@Override
