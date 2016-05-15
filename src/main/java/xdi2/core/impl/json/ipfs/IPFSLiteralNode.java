@@ -25,9 +25,13 @@ public class IPFSLiteralNode extends AbstractLiteralNode implements LiteralNode 
 	@Override
 	public void setLiteralData(Object literalData) {
 
-		JsonElement jsonElement = AbstractLiteralNode.literalDataToJsonElement(literalData);
+		// set new literal value
 
+		JsonElement jsonElement = AbstractLiteralNode.literalDataToJsonElement(literalData);
 		((IPFSContextNode) this.getContextNode()).ipfsData.add("&", jsonElement);
+
+		// store context node
+
 		((IPFSContextNode) this.getContextNode()).store();
 	}
 }

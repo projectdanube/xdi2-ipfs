@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,28 +62,6 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		return this.XDIarc;
 	}
-	/*
-	JsonObject makeJsonObject() {
-
-		JsonArray ipfsLinks = new JsonArray();
-
-		for (MerkleNode merkleNode : this.merkleNode.links) {
-
-			JsonObject ipfsLink = new JsonObject();
-			ipfsLink.addProperty("Name", merkleNode.name.get());
-			ipfsLink.addProperty("Hash", merkleNode.hash.toBase58());
-			ipfsLink.addProperty("Size", merkleNode.size.isPresent() ? merkleNode.size.get() : Integer.valueOf(0));
-
-			ipfsLinks.add(ipfsLink);
-		}
-
-		JsonObject ipfsObject = new JsonObject();
-
-		ipfsObject.addProperty("Data", new String(this.merkleNode.data.get(), StandardCharsets.UTF_8));
-		ipfsObject.add("Links", ipfsLinks);
-
-		return ipfsObject;
-	}*/
 
 	/*
 	 * Methods related to context nodes of this context node
@@ -97,22 +76,15 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		// set the context node
 
-		/*		JsonObject ipfsLink = new JsonObject();
-		ipfsLink.addProperty("Name", XDIarc.toString());
-		ipfsLink.addProperty("Hash", merkleNode.hash.toBase58());
-		ipfsLink.addProperty("Size", merkleNode.size.isPresent() ? merkleNode.size.get() : Integer.valueOf(0));
+		MerkleNode ipfsMerkleNode = this.ipfsLinks.get(XDIarc);
+		if (ipfsMerkleNode != null) return load((IPFSGraph) this.getGraph(), this, XDIarc, ipfsMerkleNode.hash);
 
+		IPFSContextNode contextNode = empty((IPFSGraph) this.getGraph(), this, XDIarc);
+		this.ipfsLinks.put(XDIarc, contextNode.ipfsMerkleNode);
 
-		ContextNode contextNode = this.contextNodes.get(XDIarc);
+		// store context node
 
-		if (contextNode != null) {
-
-			return contextNode;
-		}
-
-		contextNode = new IPFSContextNode((IPFSGraph) this.getGraph(), this, XDIarc);
-
-		this.contextNodes.put(XDIarc, (IPFSContextNode) contextNode);
+		this.store();
 
 		// set inner root
 
@@ -120,15 +92,15 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		// done
 
-		return contextNode;*/
-
-		return null;
+		return contextNode;
 	}
 
 	@Override
 	public ReadOnlyIterator<ContextNode> getContextNodes() {
 
 		List<ContextNode> list = new ArrayList<ContextNode> ();
+
+		// get context nodes
 
 		for (Entry<XDIArc, MerkleNode> entry : this.ipfsLinks.entrySet()) {
 
@@ -139,23 +111,21 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 			list.add(contextNode);
 		}
 
+		// done
+
 		return new ReadOnlyIterator<ContextNode> (list.iterator());
 	}
 
 	@Override
 	public synchronized void delContextNode(XDIArc XDIarc) {
 
-		/*		ContextNode contextNode = this.getContextNode(XDIarc, true);
-		if (contextNode == null) return;
+		// delete the context node
 
-		// delete all inner roots and incoming relations
+		this.ipfsLinks.remove(XDIarc);
 
-		((IPFSContextNode) contextNode).delContextNodeDelAllInnerRoots();
-		((IPFSContextNode) contextNode).delContextNodeDelAllIncomingRelations();
+		// store context node
 
-		// delete this context node
-
-		this.contextNodes.remove(XDIarc);*/
+		this.store();
 	}
 
 	/*
@@ -165,7 +135,7 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 	@Override
 	public synchronized Relation setRelation(XDIAddress XDIaddress, Node targetNode) {
 
-		/*		XDIAddress targetXDIAddress = targetNode.getXDIAddress();
+		XDIAddress targetXDIAddress = targetNode.getXDIAddress();
 
 		// check validity
 
@@ -173,40 +143,44 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		// set the relation
 
-		Relation relation = this.getRelation(XDIaddress, targetXDIAddress);
-		if (relation != null) return relation;
+		JsonArray jsonArray = this.ipfsData.getAsJsonArray("/" + XDIaddress.toString());
 
-		Map<XDIAddress, IPFSRelation> relations = this.relations.get(XDIaddress);
-		if (relations == null) {
+		boolean found = false;
 
-			if (((IPFSGraph) this.getGraph()).getSortMode() == MemoryGraphFactory.SORTMODE_ALPHA) {
+		if (jsonArray == null) {
 
-				relations = new TreeMap<XDIAddress, IPFSRelation> ();
-			} else if (((IPFSGraph) this.getGraph()).getSortMode() == MemoryGraphFactory.SORTMODE_ORDER) {
+			jsonArray = new JsonArray();
+			this.ipfsData.add("/" + XDIaddress.toString(), jsonArray);
+		} else {
 
-				relations = new LinkedHashMap<XDIAddress, IPFSRelation> ();
-			} else {
+			for (int i=0; i<jsonArray.size(); i++) {
 
-				relations = new HashMap<XDIAddress, IPFSRelation> ();
+				if (jsonArray.get(i).equals("/" + XDIaddress.toString())) {
+
+					found = true;
+					break;
+				}
 			}
-
-			this.relations.put(XDIaddress, relations);
 		}
 
-		relation = new IPFSRelation(this, XDIaddress, targetXDIAddress);
+		if (! found) jsonArray.add(new JsonPrimitive(targetXDIAddress.toString()));
 
-		relations.put(targetXDIAddress, (IPFSRelation) relation);
+		// store context node
+
+		this.store();
 
 		// done
 
-		return relation;*/
-		return null;
+		IPFSRelation relation = new IPFSRelation(this, XDIaddress, targetXDIAddress);
+		return relation;
 	}
 
 	@Override
 	public ReadOnlyIterator<Relation> getRelations() {
 
 		List<Relation> list = new ArrayList<Relation> ();
+
+		// get relations
 
 		for (Entry<String, JsonElement> entry : this.ipfsData.entrySet()) {
 
@@ -237,28 +211,38 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 			}
 		}
 
+		// done
+
 		return new ReadOnlyIterator<Relation> (list.iterator());
 	}
 
 	@Override
 	public synchronized void delRelation(XDIAddress XDIaddress, XDIAddress targetXDIAddress) {
 
-		// delete the relation
+		// delete relation
 
-		/*		Map<XDIAddress, IPFSRelation> relations = this.relations.get(XDIaddress);
-		if (relations == null) return;
+		JsonArray jsonArray = this.ipfsData.getAsJsonArray("/" + XDIaddress.toString());
+		if (jsonArray == null) return;
 
-		IPFSRelation relation = relations.remove(targetXDIAddress);
-		if (relation == null) return;
+		for (Iterator<JsonElement> i = jsonArray.iterator(); i.hasNext(); ) {
 
-		if (relations.isEmpty()) {
+			JsonElement jsonElement = i.next();
 
-			this.relations.remove(XDIaddress);
+			if (jsonElement.equals("/" + XDIaddress.toString())) {
+
+				i.remove();
+			}
 		}
+
+		if (jsonArray.size() < 1) this.ipfsData.remove("/" + XDIaddress.toString());
+
+		// store context node
+
+		this.store();
 
 		// delete inner root
 
-		this.delRelationDelInnerRoot(XDIaddress, targetXDIAddress);*/
+		this.delRelationDelInnerRoot(XDIaddress, targetXDIAddress);
 	}
 
 	/*
@@ -275,8 +259,10 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 		// set the literal
 
 		JsonElement jsonElement = AbstractLiteralNode.literalDataToJsonElement(literalData);
-
 		this.ipfsData.add("&", jsonElement);
+
+		// store context node
+
 		this.store();
 
 		// done
@@ -287,8 +273,12 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 	@Override
 	public LiteralNode getLiteralNode() {
 
+		// get literal node
+
 		JsonElement jsonElement = this.ipfsData.get("&");
 		if (jsonElement == null) return null;
+
+		// done
 
 		return new IPFSLiteralNode(this);
 	}
@@ -296,7 +286,11 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 	@Override
 	public synchronized void delLiteralNode() {
 
+		// delete literal node
+
 		this.ipfsData.remove("&");
+
+		// store context node
 
 		this.store();
 	}
@@ -355,6 +349,8 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 		try {
 
 			ipfsMerkleNode = graph.getIpfs().object.get(multihash);
+			if (ipfsMerkleNode == null) return null;
+
 			if (log.isDebugEnabled()) log.debug("Load merkle node " + multihash + ": " + ipfsMerkleNode.toJSONString());
 
 			for (MerkleNode ipfsLink : ipfsMerkleNode.links) {

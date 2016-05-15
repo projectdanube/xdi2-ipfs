@@ -22,6 +22,7 @@ public class IPFSGraph extends AbstractGraph implements Graph {
 		this.ipfs = ipfs;
 
 		this.rootContextNode = IPFSContextNode.load(this, null, null, Multihash.fromBase58(identifier));
+		if (this.rootContextNode == null) this.rootContextNode = IPFSContextNode.empty(this, null, null);
 	}
 
 	@Override
