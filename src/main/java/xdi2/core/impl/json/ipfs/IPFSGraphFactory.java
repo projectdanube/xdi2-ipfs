@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.ipfs.api.IPFS;
 import org.ipfs.api.MultiAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import xdi2.core.GraphFactory;
 import xdi2.core.impl.AbstractGraphFactory;
@@ -16,8 +14,6 @@ import xdi2.core.impl.AbstractGraphFactory;
  * @author markus
  */
 public class IPFSGraphFactory extends AbstractGraphFactory implements GraphFactory {
-
-	private static final Logger log = LoggerFactory.getLogger(IPFSGraphFactory.class);
 
 	public static final String  DEFAULT_IPFS_MULTIADDRESS = "/ip4/127.0.0.1/tcp/5001";
 

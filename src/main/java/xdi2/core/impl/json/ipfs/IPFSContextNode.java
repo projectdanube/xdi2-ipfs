@@ -40,10 +40,12 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 	private static final Logger log = LoggerFactory.getLogger(IPFSContextNode.class);
 
 	private static final Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
-	private static final Multihash MULTIHASH_EMPTY = Multihash.fromBase58("QmStX2p9x3AV9Gdp1ArLk7bLNzZft5WCBxSLCp4NdbU3z4");
+
+	public static final Multihash MULTIHASH_EMPTY = Multihash.fromBase58("QmStX2p9x3AV9Gdp1ArLk7bLNzZft5WCBxSLCp4NdbU3z4");
 
 	private XDIArc XDIarc;
-	private MerkleNode ipfsMerkleNode;
+
+	MerkleNode ipfsMerkleNode;
 	Map<XDIArc, MerkleNode> ipfsLinks;
 	JsonObject ipfsData;
 
@@ -52,6 +54,7 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 		super(graph, contextNode);
 
 		this.XDIarc = XDIarc;
+
 		this.ipfsMerkleNode = ipfsMerkleNode;
 		this.ipfsLinks = ipfsLinks;
 		this.ipfsData = ipfsData;
@@ -351,7 +354,7 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 			ipfsMerkleNode = graph.getIpfs().object.get(multihash);
 			if (ipfsMerkleNode == null) return null;
 
-			if (log.isDebugEnabled()) log.debug("Load merkle node " + multihash + ": " + ipfsMerkleNode.toJSONString());
+			if (log.isDebugEnabled()) log.debug("Loaded merkle node " + multihash + ": " + ipfsMerkleNode.toJSONString());
 
 			for (MerkleNode ipfsLink : ipfsMerkleNode.links) {
 
@@ -400,7 +403,8 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 		try {
 
 			ipfsMerkleNode = ((IPFSGraph) this.getGraph()).getIpfs().object.put(Collections.singletonList(gson.toJson(ipfsObject).getBytes(StandardCharsets.UTF_8))).get(0);
-			if (log.isDebugEnabled()) log.debug(this.getXDIAddress() + " --> " + ipfsMerkleNode.hash.toBase58());
+
+			if (log.isDebugEnabled()) log.debug("Stored merkle node for " + this.getXDIAddress() + ": " + ipfsMerkleNode.hash);
 		} catch (IOException ex) {
 
 			throw new Xdi2RuntimeException("Cannot store merkle node: " + ex.getMessage(), ex);
@@ -420,6 +424,9 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 			parentContextNode.ipfsLinks.put(this.XDIarc, this.ipfsMerkleNode);
 			parentContextNode.store();
+		} else {
+
+			((IPFSGraph) this.getGraph()).store();
 		}
 	}
 }
