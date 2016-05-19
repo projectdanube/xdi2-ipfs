@@ -15,7 +15,7 @@ import xdi2.core.impl.AbstractGraphFactory;
  */
 public class IPFSGraphFactory extends AbstractGraphFactory implements GraphFactory {
 
-	public static final String  DEFAULT_IPFS_MULTIADDRESS = "/ip4/127.0.0.1/tcp/5001";
+	public static final String DEFAULT_IPFS_MULTIADDRESS = "/ip4/127.0.0.1/tcp/5001";
 
 	private String ipfsMultiaddress;
 
