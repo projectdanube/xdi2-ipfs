@@ -1,7 +1,7 @@
 package xdi2.core.impl.json.ipfs;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -323,7 +323,7 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		JsonObject jsonObject;
 
-		String tempString = "{\"temp\":\"" + new String(node.data.get(), StandardCharsets.UTF_8) + "\"}";
+		String tempString = "{\"temp\":\"" + new String(node.data.get(), Charset.forName("UTF-8")) + "\"}";
 
 		try {
 
@@ -402,7 +402,7 @@ public class IPFSContextNode extends AbstractContextNode implements ContextNode 
 
 		try {
 
-			ipfsMerkleNode = ((IPFSGraph) this.getGraph()).getIpfs().object.put(Collections.singletonList(gson.toJson(ipfsObject).getBytes(StandardCharsets.UTF_8))).get(0);
+			ipfsMerkleNode = ((IPFSGraph) this.getGraph()).getIpfs().object.put(Collections.singletonList(gson.toJson(ipfsObject).getBytes(Charset.forName("UTF-8")))).get(0);
 
 			if (log.isDebugEnabled()) log.debug("Stored merkle node for " + this.getXDIAddress() + ": " + ipfsMerkleNode.hash);
 		} catch (IOException ex) {
